@@ -3,7 +3,7 @@ from openai import OpenAI
 # Initialize the OpenAI client
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
-    api_key="YOUR_API_KEY_HERE"  # Replace with your actual API key
+    api_key="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"  # Replace with your actual API key
 )
 
 def generate_response(prompt):
