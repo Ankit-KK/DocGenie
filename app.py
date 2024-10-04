@@ -4,7 +4,7 @@ import fitz  # PyMuPDF for PDF handling
 import magic  # For file type detection
 
 # Initialize OpenAI client
-api_key = "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"  # Store your API key in Streamlit secrets
+api_key = "YOUR_API_KEY"  # Store your API key in Streamlit secrets
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=api_key
@@ -20,8 +20,7 @@ code_input = st.text_area("Enter your code here (or upload a file below):")
 uploaded_file = st.file_uploader("Upload your code file (PDF, .py, .java, .c, etc.)", 
                                    type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 
-prompt = ''' "Provide detailed descriptions of the code, usage instructions, and any relevant explanations. "
-        "Ensure the documentation is clear, concise, and suitable for both developers and end-users."'''
+prompt = '''Provide detailed descriptions of the code, usage instructions, and any relevant explanations. Ensure the documentation is clear, concise, and suitable for both developers and end-users.'''
 max_tokens = st.slider("Max tokens", min_value=100, max_value=2048, value=1024, step=100)
 
 # Function to extract text from PDF
@@ -38,10 +37,8 @@ def read_text_from_file(file):
     return text
 
 if st.button("Generate Documentation"):
-    # If code is provided directly in the text area, use that
-    if code_input:
-        code_content = code_input
-    elif uploaded_file is not None:
+    # Prioritize uploaded file if available
+    if uploaded_file is not None:
         # Read the first few bytes for magic detection
         uploaded_file_bytes = uploaded_file.read(2048)
         file_type = magic.from_buffer(uploaded_file_bytes, mime=True)
@@ -69,7 +66,8 @@ if st.button("Generate Documentation"):
             st.error("Unsupported file type. Please upload a PDF or a text code file.")
             code_content = ""
     else:
-        code_content = ""
+        # If no uploaded file, use the text input from the user
+        code_content = code_input
 
     if code_content and prompt:
         try:
@@ -92,4 +90,4 @@ if st.button("Generate Documentation"):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
     else:
-        st.error("Please provide either code input or upload a valid code file and enter a prompt.")
+        st.error("Please provide either code input or upload a valid code file.")
