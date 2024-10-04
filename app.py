@@ -28,9 +28,6 @@ if st.button("Generate Documentation"):
                 max_tokens=max_tokens
             )
 
-            # Debugging line: print the entire response
-            st.write(completion)  # Print for debugging
-
             # Extract and display the response
             if completion.choices:
                 documentation = completion.choices[0].message.content  # Corrected access
