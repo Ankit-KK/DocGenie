@@ -1,6 +1,6 @@
 import streamlit as st
 from openai import OpenAI
-import fitz  # PyMuPDF
+import fitz  # PyMuPDF for PDF handling
 import magic  # For file type detection
 
 # Initialize OpenAI client
@@ -13,9 +13,13 @@ client = OpenAI(
 # Streamlit app title
 st.title("Automated Code Documentation Generator")
 
+# Option to input code directly or upload a file
+code_input = st.text_area("Enter your code here (or upload a file below):")
+
 # File uploader for code files (PDF and other text files)
 uploaded_file = st.file_uploader("Upload your code file (PDF, .py, .java, .c, etc.)", 
                                    type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
+
 prompt = st.text_area("Enter your prompt for documentation generation:")
 max_tokens = st.slider("Max tokens", min_value=100, max_value=2048, value=1024, step=100)
 
@@ -33,7 +37,10 @@ def read_text_from_file(file):
     return text
 
 if st.button("Generate Documentation"):
-    if uploaded_file is not None:
+    # If code is provided directly in the text area, use that
+    if code_input:
+        code_content = code_input
+    elif uploaded_file is not None:
         # Read the first few bytes for magic detection
         uploaded_file_bytes = uploaded_file.read(2048)
         file_type = magic.from_buffer(uploaded_file_bytes, mime=True)
@@ -44,7 +51,7 @@ if st.button("Generate Documentation"):
 
         # Extract text based on file type
         if file_type == "application/pdf":
-            code_input = extract_text_from_pdf(uploaded_file)
+            code_content = extract_text_from_pdf(uploaded_file)
         elif file_type in [
             "text/x-python", 
             "text/x-script.python",  # Added this MIME type
@@ -56,19 +63,19 @@ if st.button("Generate Documentation"):
             "text/css", 
             "text/plain"
         ]:
-            code_input = read_text_from_file(uploaded_file)
+            code_content = read_text_from_file(uploaded_file)
         else:
             st.error("Unsupported file type. Please upload a PDF or a text code file.")
-            code_input = ""
+            code_content = ""
     else:
-        code_input = ""
+        code_content = ""
 
-    if code_input and prompt:
+    if code_content and prompt:
         try:
             # Call the OpenAI model
             completion = client.chat.completions.create(
                 model="mistralai/mistral-7b-instruct-v0.3",
-                messages=[{"role": "user", "content": f"{prompt}\n\n{code_input}"}],
+                messages=[{"role": "user", "content": f"{prompt}\n\n{code_content}"}],
                 temperature=0.2,
                 top_p=0.7,
                 max_tokens=max_tokens
@@ -84,4 +91,4 @@ if st.button("Generate Documentation"):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
     else:
-        st.error("Please upload a valid code file and enter a prompt.")
+        st.error("Please provide either code input or upload a valid code file and enter a prompt.")
