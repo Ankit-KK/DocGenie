@@ -6,7 +6,7 @@ import tempfile
 import os
 
 # Initialize OpenAI client
-api_key ="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"  # Store your API key in Streamlit secrets
+api_key = st.secrets["openai_api_key"]  # Store your API key in Streamlit secrets
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=api_key
@@ -18,15 +18,14 @@ st.set_page_config(page_title="Code Documentation Generator", layout="wide")
 # Streamlit app title and description
 st.title("Automated Code Documentation Generator")
 st.markdown("""
-This app generates detailed documentation for your code using AI. 
+This app generates detailed documentation for your code using the Mistral AI model. 
 You can either paste your code directly or upload a file.
 """)
 
 # Sidebar for settings
 with st.sidebar:
     st.header("Settings")
-    model = st.selectbox("Select AI Model", ["mistralai/mistral-7b-instruct-v0.3", "anthropic/claude-3-sonnet-20240229"])
-    max_tokens = st.slider("Max tokens", min_value=100, max_value=4096, value=1024, step=100)
+    max_tokens = st.slider("Max tokens", min_value=100, max_value=2048, value=1024, step=100)
     temperature = st.slider("Temperature", min_value=0.0, max_value=1.0, value=0.2, step=0.1)
     top_p = st.slider("Top P", min_value=0.0, max_value=1.0, value=0.7, step=0.1)
 
@@ -82,10 +81,10 @@ def generate_prompt(code, style, custom_instructions):
     prompt += "Here's the code to document:\n\n```\n{code}\n```"
     return prompt
 
-def generate_documentation(prompt, model, max_tokens, temperature, top_p):
+def generate_documentation(prompt, max_tokens, temperature, top_p):
     try:
         completion = client.chat.completions.create(
-            model=model,
+            model="mistralai/mistral-7b-instruct-v0.3",
             messages=[{"role": "user", "content": prompt}],
             temperature=temperature,
             top_p=top_p,
@@ -115,7 +114,7 @@ if st.button("Generate Documentation"):
             st.stop()
 
         prompt = generate_prompt(code_content, doc_style, custom_instructions)
-        documentation = generate_documentation(prompt, model, max_tokens, temperature, top_p)
+        documentation = generate_documentation(prompt, max_tokens, temperature, top_p)
 
         if documentation:
             st.subheader("Generated Documentation:")
