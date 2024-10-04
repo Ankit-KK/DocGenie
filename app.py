@@ -45,7 +45,17 @@ if st.button("Generate Documentation"):
         # Extract text based on file type
         if file_type == "application/pdf":
             code_input = extract_text_from_pdf(uploaded_file)
-        elif file_type in ["text/x-python", "text/x-java", "text/x-c", "text/x-c++", "text/javascript", "text/html", "text/css", "text/plain"]:
+        elif file_type in [
+            "text/x-python", 
+            "text/x-script.python",  # Added this MIME type
+            "text/x-java", 
+            "text/x-c", 
+            "text/x-c++", 
+            "text/javascript", 
+            "text/html", 
+            "text/css", 
+            "text/plain"
+        ]:
             code_input = read_text_from_file(uploaded_file)
         else:
             st.error("Unsupported file type. Please upload a PDF or a text code file.")
