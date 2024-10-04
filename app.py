@@ -4,7 +4,7 @@ from openai import OpenAI
 # Initialize OpenAI client
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
-    api_key=st.secrets["API_KEY"]  # Use Streamlit secrets for API key
+    api_key="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"  # Use Streamlit secrets for API key
 )
 
 # Streamlit app title
