@@ -4,7 +4,7 @@ import fitz  # PyMuPDF
 import magic  # For file type detection
 
 # Initialize OpenAI client
-api_key = "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"  # Store your API key in Streamlit secrets
+api_key = "YOUR_API_KEY"  # Store your API key in Streamlit secrets
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=api_key
@@ -34,10 +34,14 @@ def read_text_from_file(file):
 
 if st.button("Generate Documentation"):
     if uploaded_file is not None:
-        # Check file type using magic library
-        file_type = magic.from_buffer(uploaded_file.read(2048), mime=True)
+        # Read the first few bytes for magic detection
+        uploaded_file_bytes = uploaded_file.read(2048)
+        file_type = magic.from_buffer(uploaded_file_bytes, mime=True)
         uploaded_file.seek(0)  # Reset the file pointer to the beginning
-        
+
+        # Debugging statement to check the file type
+        st.write(f"Detected file type: {file_type}")
+
         # Extract text based on file type
         if file_type == "application/pdf":
             code_input = extract_text_from_pdf(uploaded_file)
