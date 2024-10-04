@@ -2,6 +2,11 @@ import streamlit as st
 from openai import OpenAI
 import fitz  # PyMuPDF for PDF handling
 import magic  # For file type detection
+import tempfile
+import os
+
+# Configuration
+st.set_page_config(page_title="Automated Code Documentation Generator", layout="wide")
 
 # Initialize OpenAI client
 api_key = "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"  # Store your API key in Streamlit secrets
@@ -10,84 +15,98 @@ client = OpenAI(
     api_key=api_key
 )
 
-# Streamlit app title
+# Streamlit app title and description
 st.title("Automated Code Documentation Generator")
+st.markdown("Generate detailed documentation for your code using AI. Enter your code or upload a file.")
 
-# Option to input code directly or upload a file
-code_input = st.text_area("Enter your code here (or upload a file below):")
-
-# File uploader for code files (PDF and other text files)
-uploaded_file = st.file_uploader("Upload your code file (PDF, .py, .java, .c, etc.)", 
-                                   type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
-
-prompt = '''Provide detailed descriptions of the code, usage instructions, and any relevant explanations. Ensure the documentation is clear, concise, and suitable for both developers and end-users.'''
-max_tokens = st.slider("Max tokens", min_value=100, max_value=2048, value=1024, step=100)
-
-# Function to extract text from PDF
+# Functions
 def extract_text_from_pdf(file):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        temp_file.write(file.getvalue())
+        temp_file_path = temp_file.name
+
     text = ""
-    pdf_document = fitz.open(file)
-    for page in pdf_document:
-        text += page.get_text()
+    try:
+        with fitz.open(temp_file_path) as pdf_document:
+            for page in pdf_document:
+                text += page.get_text()
+    finally:
+        os.unlink(temp_file_path)
     return text
 
-# Function to read text from other code files
 def read_text_from_file(file):
-    text = file.read().decode("utf-8")  # Decode the byte stream to string
-    return text
+    return file.getvalue().decode("utf-8")
 
+def get_file_type(file):
+    file_bytes = file.getvalue()
+    return magic.from_buffer(file_bytes, mime=True)
+
+def generate_documentation(code_content, max_tokens):
+    prompt = '''Provide detailed descriptions of the code, usage instructions, and any relevant explanations. 
+    Ensure the documentation is clear, concise, and suitable for both developers and end-users.'''
+    
+    try:
+        completion = client.chat.completions.create(
+            model="mistralai/mistral-7b-instruct-v0.3",
+            messages=[{"role": "user", "content": f"{prompt}\n\n{code_content}"}],
+            temperature=0.2,
+            top_p=0.7,
+            max_tokens=max_tokens
+        )
+        return completion.choices[0].message.content if completion.choices else None
+    except Exception as e:
+        st.error(f"An error occurred while generating documentation: {str(e)}")
+        return None
+
+# User Interface
+col1, col2 = st.columns(2)
+
+with col1:
+    code_input = st.text_area("Enter your code here:", height=300)
+
+with col2:
+    uploaded_file = st.file_uploader("Or upload a code file:", 
+                                     type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
+
+max_tokens = st.slider("Max tokens for generated documentation", 
+                       min_value=100, max_value=2048, value=1024, step=100)
+
+# Main logic
 if st.button("Generate Documentation"):
-    # Prioritize uploaded file if available
-    if uploaded_file is not None:
-        # Read the first few bytes for magic detection
-        uploaded_file_bytes = uploaded_file.read(2048)
-        file_type = magic.from_buffer(uploaded_file_bytes, mime=True)
-        uploaded_file.seek(0)  # Reset the file pointer to the beginning
-
-        # Debugging statement to check the file type
-        st.write(f"Detected file type: {file_type}")
-
-        # Extract text based on file type
-        if file_type == "application/pdf":
-            code_content = extract_text_from_pdf(uploaded_file)
-        elif file_type in [
-            "text/x-python", 
-            "text/x-script.python",  # Added this MIME type
-            "text/x-java", 
-            "text/x-c", 
-            "text/x-c++", 
-            "text/javascript", 
-            "text/html", 
-            "text/css", 
-            "text/plain"
-        ]:
-            code_content = read_text_from_file(uploaded_file)
-        else:
-            st.error("Unsupported file type. Please upload a PDF or a text code file.")
-            code_content = ""
-    else:
-        # If no uploaded file, use the text input from the user
-        code_content = code_input
-
-    if code_content and prompt:
-        try:
-            # Call the OpenAI model
-            completion = client.chat.completions.create(
-                model="mistralai/mistral-7b-instruct-v0.3",
-                messages=[{"role": "user", "content": f"{prompt}\n\n{code_content}"}],
-                temperature=0.2,
-                top_p=0.7,
-                max_tokens=max_tokens
-            )
-
-            # Extract and display the response
-            if completion.choices:
-                documentation = completion.choices[0].message.content  # Corrected access
-                st.subheader("Generated Documentation:")
-                st.write(documentation)
+    with st.spinner("Generating documentation..."):
+        if uploaded_file:
+            file_type = get_file_type(uploaded_file)
+            st.info(f"Detected file type: {file_type}")
+            
+            if file_type == "application/pdf":
+                code_content = extract_text_from_pdf(uploaded_file)
+            elif file_type.startswith("text"):
+                code_content = read_text_from_file(uploaded_file)
             else:
-                st.error("No documentation generated.")
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-    else:
-        st.error("Please provide either code input or upload a valid code file.")
+                st.error("Unsupported file type. Please upload a PDF or a text code file.")
+                st.stop()
+        elif code_input:
+            code_content = code_input
+        else:
+            st.error("Please provide either code input or upload a valid code file.")
+            st.stop()
+
+        documentation = generate_documentation(code_content, max_tokens)
+
+        if documentation:
+            st.subheader("Generated Documentation:")
+            st.markdown(documentation)
+            
+            # Option to download the documentation
+            st.download_button(
+                label="Download Documentation",
+                data=documentation,
+                file_name="generated_documentation.md",
+                mime="text/markdown"
+            )
+        else:
+            st.error("Failed to generate documentation. Please try again.")
+
+# Footer
+st.markdown("---")
+st.markdown("Created with ❤️ by Your Name/Company")
