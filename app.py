@@ -2,10 +2,10 @@ import streamlit as st
 from openai import OpenAI
 
 # Initialize OpenAI client
-api_key = st.secrets["openai_api_key"]  # Store your API key in Streamlit secrets
+
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
-    api_key=api_key
+    api_key="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"
 )
 
 # Streamlit app title
