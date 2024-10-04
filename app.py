@@ -23,17 +23,21 @@ if st.button("Generate Documentation"):
         prompt = f"Generate documentation for the following code:\n\n{user_code}\n\nInstructions: {instructions}"
 
         # Call the OpenAI model
-        completion = client.chat.completions.create(
-            model="mistralai/mistral-7b-instruct-v0.3",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-            top_p=0.7,
-            max_tokens=1024
-        )
+completion = client.chat.completions.create(
+    model="mistralai/mistral-7b-instruct-v0.3",
+    messages=[{"role": "user", "content": prompt}],
+    temperature=0.2,
+    top_p=0.7,
+    max_tokens=1024
+)
 
-        # Extract and display the response
-        documentation = completion.choices[0].message['content']
-        st.subheader("Generated Documentation:")
-        st.write(documentation)
-    else:
-        st.error("Please enter some code to generate documentation.")
+# Print the entire response for debugging
+st.write(completion)  # Debugging line
+
+# Extract and display the response
+if completion.choices:
+    documentation = completion.choices[0].message['content']  # Adjust based on actual structure
+    st.subheader("Generated Documentation:")
+    st.write(documentation)
+else:
+    st.error("No documentation generated.")
