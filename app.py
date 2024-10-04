@@ -34,7 +34,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize OpenAI client
-api_key = "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"  # Store your API key in Streamlit secrets
+api_key = api_key = st.secrets["api_key"]  # Store your API key in Streamlit secrets
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=api_key
@@ -167,4 +167,4 @@ if st.button("Generate Documentation"):
 
 # Footer
 st.markdown("---")
-st.markdown("Created with ❤️ by Your Name/Company")
+st.markdown("Created with ❤️ by Ankit")
