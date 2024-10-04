@@ -20,7 +20,8 @@ code_input = st.text_area("Enter your code here (or upload a file below):")
 uploaded_file = st.file_uploader("Upload your code file (PDF, .py, .java, .c, etc.)", 
                                    type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 
-prompt = st.text_area("Enter your prompt for documentation generation:")
+prompt = ''' "Provide detailed descriptions of the code, usage instructions, and any relevant explanations. "
+        "Ensure the documentation is clear, concise, and suitable for both developers and end-users."'''
 max_tokens = st.slider("Max tokens", min_value=100, max_value=2048, value=1024, step=100)
 
 # Function to extract text from PDF
