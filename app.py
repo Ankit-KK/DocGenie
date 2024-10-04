@@ -6,7 +6,7 @@ import tempfile
 import os
 
 # Initialize OpenAI client
-api_key = st.secrets["openai_api_key"]  # Store your API key in Streamlit secrets
+api_key ="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"  # Store your API key in Streamlit secrets
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=api_key
