@@ -1,6 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 import fitz  # PyMuPDF
+import magic  # For file type detection
 
 # Initialize OpenAI client
 api_key = "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"  # Store your API key in Streamlit secrets
@@ -12,9 +13,9 @@ client = OpenAI(
 # Streamlit app title
 st.title("Automated Code Documentation Generator")
 
-# File uploader for PDF or text area for code
-uploaded_file = st.file_uploader("Upload your code PDF file", type=["pdf"])
-code_input = st.text_area("Or enter your code here:")
+# File uploader for code files (PDF and other text files)
+uploaded_file = st.file_uploader("Upload your code file (PDF, .py, .java, .c, etc.)", 
+                                   type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 prompt = st.text_area("Enter your prompt for documentation generation:")
 max_tokens = st.slider("Max tokens", min_value=100, max_value=2048, value=1024, step=100)
 
@@ -26,11 +27,27 @@ def extract_text_from_pdf(file):
         text += page.get_text()
     return text
 
+# Function to read text from other code files
+def read_text_from_file(file):
+    text = file.read().decode("utf-8")  # Decode the byte stream to string
+    return text
+
 if st.button("Generate Documentation"):
-    # Check if code input is from PDF or text area
     if uploaded_file is not None:
-        # Extract text from the uploaded PDF
-        code_input = extract_text_from_pdf(uploaded_file)
+        # Check file type using magic library
+        file_type = magic.from_buffer(uploaded_file.read(2048), mime=True)
+        uploaded_file.seek(0)  # Reset the file pointer to the beginning
+        
+        # Extract text based on file type
+        if file_type == "application/pdf":
+            code_input = extract_text_from_pdf(uploaded_file)
+        elif file_type in ["text/x-python", "text/x-java", "text/x-c", "text/x-c++", "text/javascript", "text/html", "text/css", "text/plain"]:
+            code_input = read_text_from_file(uploaded_file)
+        else:
+            st.error("Unsupported file type. Please upload a PDF or a text code file.")
+            code_input = ""
+    else:
+        code_input = ""
 
     if code_input and prompt:
         try:
@@ -53,4 +70,4 @@ if st.button("Generate Documentation"):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
     else:
-        st.error("Please provide either code or upload a PDF file and enter a prompt.")
+        st.error("Please upload a valid code file and enter a prompt.")
