@@ -4,7 +4,7 @@ import fitz  # PyMuPDF
 import magic  # For file type detection
 
 # Initialize OpenAI client
-api_key = "YOUR_API_KEY"  # Store your API key in Streamlit secrets
+api_key = "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"  # Store your API key in Streamlit secrets
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=api_key
