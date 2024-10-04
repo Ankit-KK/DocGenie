@@ -1,4 +1,3 @@
-```markdown
 # DocGenie: Automated Code Documentation Generator
 
 DocGenie is an intelligent application designed to automate the generation of code documentation. Utilizing AI capabilities, it creates clear, comprehensive, and engaging documentation tailored for both technical and non-technical audiences. Users can either input their code directly or upload a code file in various formats.
@@ -83,5 +82,4 @@ For any questions or suggestions, feel free to reach out to me at ankitashuk20@g
 ---
 
 **Created with ❤️ by Ankit**
-```
 
