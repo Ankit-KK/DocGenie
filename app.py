@@ -33,8 +33,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize OpenAI client
-api_key = api_key = st.secrets["api_key"]  # Store your API key in Streamlit secrets
+# Initialize OpenAI client with Mistral model
+api_key = st.secrets["api_key"]  # Ensure the API key is set in Streamlit secrets
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=api_key
@@ -66,7 +66,10 @@ def get_file_type(file):
     file_bytes = file.getvalue()
     return magic.from_buffer(file_bytes, mime=True)
 
-def generate_documentation(code_content, max_tokens):
+def generate_documentation_with_mistral(code_content, max_tokens):
+    """
+    Function to generate documentation using Mistral AI model.
+    """
     prompt = '''
     Imagine you're presenting this code to a mixed audience of developers and non-technical stakeholders. 
     Create a comprehensive, engaging documentation that explains the code as if you're giving a presentation. 
@@ -104,14 +107,22 @@ def generate_documentation(code_content, max_tokens):
     '''
     
     try:
+        # Use Mistral model to generate documentation
         completion = client.chat.completions.create(
-            model="mistralai/mistral-7b-instruct-v0.3",
+            model="mistralai/mixtral-8x7b-instruct-v0.1",
             messages=[{"role": "user", "content": f"{prompt}\n\nHere's the code to document:\n\n{code_content}"}],
-            temperature=0.7,
-            top_p=0.9,
-            max_tokens=max_tokens
+            temperature=0.5,
+            top_p=1,
+            max_tokens=max_tokens,
+            stream=True  # Stream the output
         )
-        return completion.choices[0].message.content if completion.choices else None
+        
+        # Stream the response
+        documentation = ""
+        for chunk in completion:
+            if chunk.choices[0].delta.content is not None:
+                documentation += chunk.choices[0].delta.content
+        return documentation
     except Exception as e:
         st.error(f"An error occurred while generating documentation: {str(e)}")
         return None
@@ -131,7 +142,7 @@ max_tokens = st.slider("Max tokens for generated documentation",
 
 # Main logic
 if st.button("Generate Documentation"):
-    with st.spinner("Generating presentation-style documentation..."):
+    with st.spinner("Generating documentation using the Mistral model..."):
         if uploaded_file:
             file_type = get_file_type(uploaded_file)
             st.info(f"Detected file type: {file_type}")
@@ -149,7 +160,8 @@ if st.button("Generate Documentation"):
             st.error("Please provide either code input or upload a valid code file.")
             st.stop()
 
-        documentation = generate_documentation(code_content, max_tokens)
+        # Call the updated function
+        documentation = generate_documentation_with_mistral(code_content, max_tokens)
 
         if documentation:
             st.subheader("Generated Documentation:")
