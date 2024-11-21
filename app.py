@@ -125,7 +125,7 @@ with col2:
 
 # Main logic
 if st.button("Generate Documentation"):
-    with st.spinner("Generating documentation using the ChatNVIDIA model..."):
+    with st.spinner("Generating documentation using the Mistral model..."):
         if uploaded_file:
             file_type = get_file_type(uploaded_file)
             st.info(f"Detected file type: {file_type}")
@@ -157,6 +157,17 @@ if st.button("Generate Documentation"):
                 file_name="generated_documentation.md",
                 mime="text/markdown"
             )
+            
+            # Feedback section
+            st.markdown("### Feedback")
+            feedback = st.text_area("Share your feedback on the generated documentation:")
+            if st.button("Submit Feedback"):
+                if feedback.strip():
+                    with open("feedback.txt", "a") as f:
+                        f.write(f"Feedback: {feedback}\n")
+                    st.success("Thank you for your feedback!")
+                else:
+                    st.warning("Please provide some feedback before submitting.")
         else:
             st.error("Failed to generate documentation. Please try again.")
 
