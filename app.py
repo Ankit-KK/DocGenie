@@ -6,13 +6,13 @@ import tempfile
 import os
 
 # Configuration
-st.set_page_config(page_title="Automated Code Documentation Generator", layout="wide")
+st.set_page_config(page_title="Automated Code Documentation Generator")
 
 # Custom CSS for better UI
 st.markdown("""
 <style>
     .stApp {
-        max-width: 1200px;
+        max-width: 800px;
         margin: 0 auto;
     }
     .stTextInput, .stTextArea {
@@ -114,16 +114,10 @@ def generate_documentation_with_langchain(code_content):
     return response
 
 # User Interface
-col1, col2 = st.columns([2, 1])
+code_input = st.text_area("Enter your code here:", height=300)
+uploaded_file = st.file_uploader("Or upload a code file:", 
+                                 type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 
-with col1:
-    code_input = st.text_area("Enter your code here:", height=300)
-
-with col2:
-    uploaded_file = st.file_uploader("Or upload a code file:", 
-                                     type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
-
-# Main logic
 if st.button("Generate Documentation"):
     with st.spinner("Generating documentation using the Mistral model..."):
         if uploaded_file:
@@ -158,7 +152,7 @@ if st.button("Generate Documentation"):
                 mime="text/markdown"
             )
 
-# Feedback Section using Google Form
+# Sidebar Feedback Section
 st.sidebar.subheader("We Value Your Feedback")
 st.sidebar.markdown("""
 <a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
