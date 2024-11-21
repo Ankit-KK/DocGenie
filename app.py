@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI
+from langchain_nvidia_ai_endpoints import ChatNVIDIA
 import fitz  # PyMuPDF for PDF handling
 import magic  # For file type detection
 import tempfile
@@ -33,11 +33,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize OpenAI client with Mistral model
-api_key = st.secrets["api_key"]  # Ensure the API key is set in Streamlit secrets
-client = OpenAI(
-    base_url="https://integrate.api.nvidia.com/v1",
-    api_key=api_key
+# Initialize NVIDIA ChatNVIDIA client
+client = ChatNVIDIA(
+    model="mistralai/mistral-7b-instruct-v0.3",
+    api_key=st.secrets["api_key"],  # Ensure the API key is set in Streamlit secrets
+    temperature=0.2,
+    top_p=0.7,
+    max_tokens=1024
 )
 
 # Streamlit app title and description
@@ -66,9 +68,9 @@ def get_file_type(file):
     file_bytes = file.getvalue()
     return magic.from_buffer(file_bytes, mime=True)
 
-def generate_documentation_with_mistral(code_content, max_tokens):
+def generate_documentation_with_langchain(code_content):
     """
-    Function to generate documentation using Mistral AI model.
+    Function to generate documentation using ChatNVIDIA model.
     """
     prompt = '''
     Imagine you're presenting this code to a mixed audience of developers and non-technical stakeholders. 
@@ -106,26 +108,10 @@ def generate_documentation_with_mistral(code_content, max_tokens):
     Remember to use clear, concise language and maintain an engaging, presentation-like tone throughout the documentation.
     '''
     
-    try:
-        # Use Mistral model to generate documentation
-        completion = client.chat.completions.create(
-            model="mistralai/mixtral-8x7b-instruct-v0.1",
-            messages=[{"role": "user", "content": f"{prompt}\n\nHere's the code to document:\n\n{code_content}"}],
-            temperature=0.5,
-            top_p=1,
-            max_tokens=max_tokens,
-            stream=True  # Stream the output
-        )
-        
-        # Stream the response
-        documentation = ""
-        for chunk in completion:
-            if chunk.choices[0].delta.content is not None:
-                documentation += chunk.choices[0].delta.content
-        return documentation
-    except Exception as e:
-        st.error(f"An error occurred while generating documentation: {str(e)}")
-        return None
+    response = ""
+    for chunk in client.stream([{"role": "user", "content": f"{prompt}\n\nHere's the code to document:\n\n{code_content}"}]):
+        response += chunk.content
+    return response
 
 # User Interface
 col1, col2 = st.columns([2, 1])
@@ -137,12 +123,9 @@ with col2:
     uploaded_file = st.file_uploader("Or upload a code file:", 
                                      type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 
-max_tokens = st.slider("Max tokens for generated documentation", 
-                       min_value=100, max_value=4096, value=2048, step=100)
-
 # Main logic
 if st.button("Generate Documentation"):
-    with st.spinner("Generating documentation using the Mistral model..."):
+    with st.spinner("Generating documentation using the ChatNVIDIA model..."):
         if uploaded_file:
             file_type = get_file_type(uploaded_file)
             st.info(f"Detected file type: {file_type}")
@@ -160,8 +143,8 @@ if st.button("Generate Documentation"):
             st.error("Please provide either code input or upload a valid code file.")
             st.stop()
 
-        # Call the updated function
-        documentation = generate_documentation_with_mistral(code_content, max_tokens)
+        # Generate documentation
+        documentation = generate_documentation_with_langchain(code_content)
 
         if documentation:
             st.subheader("Generated Documentation:")
