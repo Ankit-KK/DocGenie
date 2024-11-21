@@ -43,10 +43,10 @@ st.markdown("""
         border: none;
         border-radius: 8px;
     }
-    .stColumn {
+    .feedback-container {
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+        justify-content: flex-start;
+        margin-bottom: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -132,22 +132,24 @@ def generate_documentation_with_langchain(code_content):
     return response
 
 # User Interface
-left_col, right_col = st.columns([1, 4])
+code_input = st.text_area("Enter your code here:", height=300)
+uploaded_file = st.file_uploader("Or upload a code file:", 
+                                 type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 
-with left_col:
-    st.subheader("We Value Your Feedback")
+# Feedback section
+st.markdown("---")
+st.markdown("## We Value Your Feedback")
+feedback_container = st.container()
+with feedback_container:
     st.markdown("""
-    <a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
-        <button class="feedback-button">
-            Open Feedback Form
-        </button>
-    </a>
+    <div class="feedback-container">
+        <a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
+            <button class="feedback-button">
+                Open Feedback Form
+            </button>
+        </a>
+    </div>
     """, unsafe_allow_html=True)
-
-with right_col:
-    code_input = st.text_area("Enter your code here:", height=300)
-    uploaded_file = st.file_uploader("Or upload a code file:", 
-                                     type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 
 # Main logic
 if st.button("Generate Documentation"):
