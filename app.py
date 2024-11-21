@@ -125,7 +125,7 @@ with col2:
 
 # Main logic
 if st.button("Generate Documentation"):
-    with st.spinner("Generating documentation using the Mistral model..."):
+    with st.spinner("Generating documentation using the ChatNVIDIA model..."):
         if uploaded_file:
             file_type = get_file_type(uploaded_file)
             st.info(f"Detected file type: {file_type}")
@@ -157,28 +157,30 @@ if st.button("Generate Documentation"):
                 file_name="generated_documentation.md",
                 mime="text/markdown"
             )
-            
-   # Feedback Section using Google Form
-    st.sidebar.subheader("We Value Your Feedback")
-    st.sidebar.markdown("""
-    <a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
-        <button style="
-            background-color: #4CAF50; 
-            color: white; 
-            padding: 10px 20px; 
-            text-align: center; 
-            text-decoration: none; 
-            display: inline-block; 
-            font-size: 14px; 
-            margin: 4px 2px; 
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-        ">
-            Open Feedback Form
-        </button>
-    </a>
-    """, unsafe_allow_html=True)
+        else:
+            st.error("Failed to generate documentation. Please try again.")
+
+# Feedback Section using Google Form
+st.sidebar.subheader("We Value Your Feedback")
+st.sidebar.markdown("""
+<a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
+    <button style="
+        background-color: #4CAF50; 
+        color: white; 
+        padding: 10px 20px; 
+        text-align: center; 
+        text-decoration: none; 
+        display: inline-block; 
+        font-size: 14px; 
+        margin: 4px 2px; 
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+    ">
+        Open Feedback Form
+    </button>
+</a>
+""", unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
