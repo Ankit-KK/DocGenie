@@ -6,13 +6,13 @@ import tempfile
 import os
 
 # Configuration
-st.set_page_config(page_title="Automated Code Documentation Generator")
+st.set_page_config(page_title="Automated Code Documentation Generator", layout="wide")
 
 # Custom CSS for better UI
 st.markdown("""
 <style>
     .stApp {
-        max-width: 800px;
+        max-width: 1200px;
         margin: 0 auto;
     }
     .stTextInput, .stTextArea {
@@ -114,12 +114,18 @@ def generate_documentation_with_langchain(code_content):
     return response
 
 # User Interface
-code_input = st.text_area("Enter your code here:", height=300)
-uploaded_file = st.file_uploader("Or upload a code file:", 
-                                 type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
+col1, col2 = st.columns([2, 1])
 
+with col1:
+    code_input = st.text_area("Enter your code here:", height=300)
+
+with col2:
+    uploaded_file = st.file_uploader("Or upload a code file:", 
+                                     type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
+
+# Main logic
 if st.button("Generate Documentation"):
-    with st.spinner("Generating documentation using the Mistral model..."):
+    with st.spinner("Generating documentation using the ChatNVIDIA model..."):
         if uploaded_file:
             file_type = get_file_type(uploaded_file)
             st.info(f"Detected file type: {file_type}")
@@ -151,28 +157,8 @@ if st.button("Generate Documentation"):
                 file_name="generated_documentation.md",
                 mime="text/markdown"
             )
-
-# Sidebar Feedback Section
-st.sidebar.subheader("We Value Your Feedback")
-st.sidebar.markdown("""
-<a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
-    <button style="
-        background-color: #4CAF50; 
-        color: white; 
-        padding: 10px 20px; 
-        text-align: center; 
-        text-decoration: none; 
-        display: inline-block; 
-        font-size: 14px; 
-        margin: 4px 2px; 
-        cursor: pointer;
-        border: none;
-        border-radius: 8px;
-    ">
-        Open Feedback Form
-    </button>
-</a>
-""", unsafe_allow_html=True)
+        else:
+            st.error("Failed to generate documentation. Please try again.")
 
 # Footer
 st.markdown("---")
