@@ -43,6 +43,11 @@ st.markdown("""
         border: none;
         border-radius: 8px;
     }
+    .stColumn {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -127,12 +132,20 @@ def generate_documentation_with_langchain(code_content):
     return response
 
 # User Interface
-col1, col2 = st.columns([2, 1])
+left_col, right_col = st.columns([1, 4])
 
-with col1:
+with left_col:
+    st.subheader("We Value Your Feedback")
+    st.markdown("""
+    <a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
+        <button class="feedback-button">
+            Open Feedback Form
+        </button>
+    </a>
+    """, unsafe_allow_html=True)
+
+with right_col:
     code_input = st.text_area("Enter your code here:", height=300)
-
-with col2:
     uploaded_file = st.file_uploader("Or upload a code file:", 
                                      type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 
@@ -172,16 +185,6 @@ if st.button("Generate Documentation"):
             )
         else:
             st.error("Failed to generate documentation. Please try again.")
-
-# Feedback Section
-st.sidebar.subheader("We Value Your Feedback")
-st.sidebar.markdown("""
-<a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
-    <button class="feedback-button">
-        Open Feedback Form
-    </button>
-</a>
-""", unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
