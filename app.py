@@ -30,6 +30,19 @@ st.markdown("""
     h1 {
         color: #2c3e50;
     }
+    .feedback-button {
+        background-color: #4CAF50; 
+        color: white; 
+        padding: 10px 20px; 
+        text-align: center; 
+        text-decoration: none; 
+        display: inline-block; 
+        font-size: 14px; 
+        margin: 4px 2px; 
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -159,6 +172,16 @@ if st.button("Generate Documentation"):
             )
         else:
             st.error("Failed to generate documentation. Please try again.")
+
+# Feedback Section
+st.sidebar.subheader("We Value Your Feedback")
+st.sidebar.markdown("""
+<a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
+    <button class="feedback-button">
+        Open Feedback Form
+    </button>
+</a>
+""", unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
