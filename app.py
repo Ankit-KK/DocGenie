@@ -136,19 +136,26 @@ code_input = st.text_area("Enter your code here:", height=300)
 uploaded_file = st.file_uploader("Or upload a code file:", 
                                  type=["pdf", "py", "java", "c", "cpp", "js", "html", "css", "txt"])
 
-# Feedback section
-st.markdown("---")
-st.markdown("## We Value Your Feedback")
-feedback_container = st.container()
-with feedback_container:
-    st.markdown("""
-    <div class="feedback-container">
-        <a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
-            <button class="feedback-button">
-                Open Feedback Form
-            </button>
-        </a>
-    </div>
+# Feedback Section using Google Form
+    st.sidebar.subheader("We Value Your Feedback")
+    st.sidebar.markdown("""
+    <a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
+        <button style="
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 10px 20px; 
+            text-align: center; 
+            text-decoration: none; 
+            display: inline-block; 
+            font-size: 14px; 
+            margin: 4px 2px; 
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+        ">
+            Open Feedback Form
+        </button>
+    </a>
     """, unsafe_allow_html=True)
 
 # Main logic
