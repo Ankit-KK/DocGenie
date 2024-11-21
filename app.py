@@ -141,14 +141,15 @@ uploaded_file = st.file_uploader("Or upload a code file:",
 feedback_container = st.container()
 with feedback_container:
     st.markdown("""
-    <div class="feedback-container">
+    <div class="feedback-container" style="margin-top: 20px;">
         <a href="https://forms.gle/rTrFC4rwqfJ9B6mE9" target="_blank">
-            <button class="feedback-button">
+            <button class="feedback-button" style="margin-top: 20px;">
                 Open Feedback Form
             </button>
         </a>
     </div>
     """, unsafe_allow_html=True)
+
 
 # Main logic
 if st.button("Generate Documentation"):
