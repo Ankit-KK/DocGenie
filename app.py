@@ -55,7 +55,7 @@ st.markdown("""
 # Initialize NVIDIA ChatNVIDIA client
 client = ChatNVIDIA(
     model="mistralai/mistral-7b-instruct-v0.3",
-    api_key=st.secrets["api_key"],  # Ensure the API key is set in Streamlit secrets
+    api_key = st.secrets["api_keys"]["nvidia_api_key"],  # Ensure the API key is set in Streamlit secrets
     temperature=0.2,
     top_p=0.7,
     max_tokens=1024
